@@ -1,4 +1,4 @@
-import util.Util;
+import com.king.util.Util;
 import org.junit.Assert;
 import org.junit.Test;
 

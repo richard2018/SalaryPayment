@@ -1,9 +1,10 @@
-import model.*;
+import com.king.service.*;;
+import com.king.model.*;
 import org.junit.Assert;
 import org.junit.Test;
-import repository.EmployeeRepository;
-import repository.EmployeeRepositoryImpl;
-import service.*;
+import com.king.repository.EmployeeRepository;
+import com.king.repository.EmployeeRepositoryImpl;
+import com.king.service.*;
 
 import java.time.LocalDate;
 
