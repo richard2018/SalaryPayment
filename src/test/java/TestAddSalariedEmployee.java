@@ -1,10 +1,24 @@
+import com.king.model.affilication.Affiliation;
+import com.king.model.affilication.NoAffiliation;
+import com.king.model.affilication.UnionAffiliation;
+import com.king.service.AddCommissionedEmployeeService;
+import com.king.service.AddHourlyEmployeeService;
+import com.king.service.AddSalariedEmployeeService;
+import com.king.model.employee.Employee;
+import com.king.model.payclass.CommissionedClassification;
+import com.king.model.payclass.HourlyClassification;
+import com.king.model.payclass.PaymentClassification;
+import com.king.model.payclass.SalariedClassification;
+import com.king.model.paymethod.MailMethod;
+import com.king.model.schedule.BlweeklySchedule;
+import com.king.model.schedule.MonthlySchedule;
+import com.king.model.schedule.WeeklySchedule;
 import com.king.service.*;;
 import com.king.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 import com.king.repository.EmployeeRepository;
 import com.king.repository.EmployeeRepositoryImpl;
-import com.king.service.*;
 
 import java.time.LocalDate;
 
@@ -21,7 +35,7 @@ public class TestAddSalariedEmployee {
         String name = "Bob";
         String address = "Home";
         double hourSalary = 50.00;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, name, address, hourSalary);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, name, address, hourSalary);
         //when
         addHourlyEmployee.execute();
         //then
@@ -46,7 +60,7 @@ public class TestAddSalariedEmployee {
         String name = "name";
         String address = "address";
         double salary = 1000.00;
-        AddSalariedEmployee addSalariedEmployee = new AddSalariedEmployee(employeeId, name, address, salary);
+        AddSalariedEmployeeService addSalariedEmployee = new AddSalariedEmployeeService(employeeId, name, address, salary);
         //when
         addSalariedEmployee.execute();
         //then
@@ -71,7 +85,7 @@ public class TestAddSalariedEmployee {
         String address = "Street A";
         double salary = 500.00;
         double commissionRate = 100.00;
-        AddCommissionedEmployee addCommissionedEmployee = new AddCommissionedEmployee(employeeId, name, address, salary, commissionRate);
+        AddCommissionedEmployeeService addCommissionedEmployee = new AddCommissionedEmployeeService(employeeId, name, address, salary, commissionRate);
         //when
         addCommissionedEmployee.execute();
         //then
@@ -94,14 +108,14 @@ public class TestAddSalariedEmployee {
     public void should_delete_employee() {
         //give
         int employeeId = 3;
-        AddCommissionedEmployee addCommissionedEmployee = new AddCommissionedEmployee(employeeId, "name", "address", 100.00, 10.50);
+        AddCommissionedEmployeeService addCommissionedEmployee = new AddCommissionedEmployeeService(employeeId, "name", "address", 100.00, 10.50);
         addCommissionedEmployee.execute();
         //when
         {
             Employee employee = employeeRepository.getEmployee(employeeId);
             Assert.assertNotNull(employee);
         }
-        DeleteEmployeeTransaction deleteEmployeeTransaction = new DeleteEmployeeTransaction(employeeId);
+        DeleteEmployeeIService deleteEmployeeTransaction = new DeleteEmployeeIService(employeeId);
         deleteEmployeeTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -115,10 +129,10 @@ public class TestAddSalariedEmployee {
     public void should_add_time_card() {
         //give
         int employeeId = 1;
-        new AddHourlyEmployee(employeeId, "name", "address", 50.00).execute();
+        new AddHourlyEmployeeService(employeeId, "name", "address", 50.00).execute();
         LocalDate day = LocalDate.of(2017, 11, 20);
         //when
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(day, 8.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(day, 8.0, employeeId);
         timeCardTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -137,10 +151,10 @@ public class TestAddSalariedEmployee {
     public void should_add_sales_receipt() {
         //give
         int employeeId = 1;
-        new AddCommissionedEmployee(employeeId, "name", "address", 1000.00, 100.50).execute();
+        new AddCommissionedEmployeeService(employeeId, "name", "address", 1000.00, 100.50).execute();
         LocalDate day = LocalDate.of(2017, 11, 20);
         //when
-        SalesReceiptTransaction salesReceiptTransaction = new SalesReceiptTransaction(day, 5, employeeId);
+        SalesReceiptIService salesReceiptTransaction = new SalesReceiptIService(day, 5, employeeId);
         salesReceiptTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -160,14 +174,14 @@ public class TestAddSalariedEmployee {
         //give
         int employeeId = 2;
         int memberId = 10;
-        new AddHourlyEmployee(employeeId, "name", "address", 50.3).execute();
+        new AddHourlyEmployeeService(employeeId, "name", "address", 50.3).execute();
         Employee employee = employeeRepository.getEmployee(employeeId);
         //when
         UnionAffiliation unionAffiliation = new UnionAffiliation(memberId, 12.5);
         employee.setAffiliation(unionAffiliation);
         employeeRepository.addUnionMember(memberId, employee);
         LocalDate day = LocalDate.of(2017, 11, 1);
-        ServiceChargeTransaction serviceChargeTransaction = new ServiceChargeTransaction(memberId, day, 12.95);
+        ServiceChargeIService serviceChargeTransaction = new ServiceChargeIService(memberId, day, 12.95);
         serviceChargeTransaction.execute();
         //then
         Assert.assertNotNull(employee);
@@ -183,10 +197,10 @@ public class TestAddSalariedEmployee {
     public void should_change_employee_name() {
         //give
         int employeeId = 4;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "Jake", "House", 60.0);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "Jake", "House", 60.0);
         addHourlyEmployee.execute();
         //when
-        ChangeNameTransaction changeNameTransaction = new ChangeNameTransaction(employeeId, "Frank");
+        ChangeNameIService changeNameTransaction = new ChangeNameIService(employeeId, "Frank");
         changeNameTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -201,10 +215,10 @@ public class TestAddSalariedEmployee {
     public void should_change_employee_classification() {
         //give
         int employeeId = 3;
-        AddCommissionedEmployee addCommissionedEmployee = new AddCommissionedEmployee(employeeId, "name", "address", 1000.00, 200.00);
+        AddCommissionedEmployeeService addCommissionedEmployee = new AddCommissionedEmployeeService(employeeId, "name", "address", 1000.00, 200.00);
         addCommissionedEmployee.execute();
         //when
-        ChangeHourlyTransaction changeHourlyTransaction = new ChangeHourlyTransaction(employeeId, 80.73);
+        ChangeHourlyIService changeHourlyTransaction = new ChangeHourlyIService(employeeId, 80.73);
         changeHourlyTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -223,11 +237,11 @@ public class TestAddSalariedEmployee {
     public void should_change_employee_payment_method() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.34);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.34);
         addHourlyEmployee.execute();
         //when
         String mail = "mail@mail.com";
-        ChangeMailTransaction changeMailTransaction = new ChangeMailTransaction(employeeId, mail);
+        ChangeMailIService changeMailTransaction = new ChangeMailIService(employeeId, mail);
         changeMailTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -244,10 +258,10 @@ public class TestAddSalariedEmployee {
         //give
         int employeeId = 2;
         int memberId = 47;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 35.00);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 35.00);
         addHourlyEmployee.execute();
         //when
-        ChangeMemberTransaction changeMemberTransaction = new ChangeMemberTransaction(employeeId, memberId, 39.00);
+        ChangeMemberIService changeMemberTransaction = new ChangeMemberIService(employeeId, memberId, 39.00);
         changeMemberTransaction.execute();
         //then
         Employee employee = employeeRepository.getEmployee(employeeId);
@@ -270,14 +284,14 @@ public class TestAddSalariedEmployee {
         //give
         int employeeId = 2;
         int memberId = 47;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 35.00);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 35.00);
         addHourlyEmployee.execute();
         Employee employee = employeeRepository.getEmployee(employeeId);
         UnionAffiliation unionAffiliation = new UnionAffiliation(memberId, employeeId);
         employee.setAffiliation(unionAffiliation);
         employeeRepository.addUnionMember(memberId, employee);
         //when
-        ChangeUnffiliatedTransaction changeUnffiliatedTransaction = new ChangeUnffiliatedTransaction(employeeId);
+        ChangeUnffiliatedIService changeUnffiliatedTransaction = new ChangeUnffiliatedIService(employeeId);
         changeUnffiliatedTransaction.execute();
         //then
         Assert.assertTrue(employee.getAffiliation() instanceof NoAffiliation);
@@ -291,11 +305,11 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_salaried_employee() {
         //give
         int employeeId = 1;
-        AddSalariedEmployee addSalariedEmployee = new AddSalariedEmployee(employeeId, "Name", "Address", 1000.00);
+        AddSalariedEmployeeService addSalariedEmployee = new AddSalariedEmployeeService(employeeId, "Name", "Address", 1000.00);
         addSalariedEmployee.execute();
         LocalDate date = LocalDate.of(2017, 11, 30);
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);
@@ -314,11 +328,11 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_salaried_employee_on_wrong_date() {
         //give
         int employeeId = 1;
-        AddSalariedEmployee addSalariedEmployee = new AddSalariedEmployee(employeeId, "Name", "Address", 1000.00);
+        AddSalariedEmployeeService addSalariedEmployee = new AddSalariedEmployeeService(employeeId, "Name", "Address", 1000.00);
         addSalariedEmployee.execute();
         LocalDate date = LocalDate.of(2017, 11, 29);
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);
@@ -332,17 +346,17 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_no_time_cards() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 0.0);
     }
 
-    private void ValidatePaycheck(PaydayTransaction paydayTransaction, int employeeId, LocalDate date, double pay) {
+    private void ValidatePaycheck(PaydayIService paydayTransaction, int employeeId, LocalDate date, double pay) {
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);
         Assert.assertNotNull(paycheck);
         Assert.assertEquals(date, paycheck.getPayDate());
@@ -358,13 +372,13 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_one_time_cards() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 4.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 4.0, employeeId);
         timeCardTransaction.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 200.80);
@@ -377,13 +391,13 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_over_time_one_time_cards() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 9.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 9.0, employeeId);
         timeCardTransaction.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 476.9);//50.20 * 8 + 50.2 * 1.5
@@ -396,13 +410,13 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_wrong_date() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 2);//Friday
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 9.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 9.0, employeeId);
         timeCardTransaction.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Assert.assertNull(paydayTransaction.getPaycheck(employeeId));
@@ -415,15 +429,15 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_two_time_cards() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 9.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 9.0, employeeId);
         timeCardTransaction.execute();
-        TimeCardTransaction timeCardTransaction2 = new TimeCardTransaction(date.plusDays(-1), 5.0, employeeId);
+        TimeCardIService timeCardTransaction2 = new TimeCardIService(date.plusDays(-1), 5.0, employeeId);
         timeCardTransaction2.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 727.9);//50.20 * 8 + 50.2 * 1.5 + 5 * 50.2
@@ -436,15 +450,15 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_hourly_employee_time_cards_spanning_two_periods() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "name", "address", 50.20);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "name", "address", 50.20);
         addHourlyEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 9.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 9.0, employeeId);
         timeCardTransaction.execute();
-        TimeCardTransaction timeCardTransaction2 = new TimeCardTransaction(date.plusDays(-9), 5.0, employeeId);
+        TimeCardIService timeCardTransaction2 = new TimeCardIService(date.plusDays(-9), 5.0, employeeId);
         timeCardTransaction2.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 476.9);//50.20 * 8 + 50.2 * 1.5
@@ -457,11 +471,11 @@ public class TestAddSalariedEmployee {
     public void should_pay_single_commission_employee_no_sales_receipt() {
         //give
         int employeeId = 1;
-        AddCommissionedEmployee addCommissionedEmployee = new AddCommissionedEmployee(employeeId, "name", "address", 1000.00, 125.0);
+        AddCommissionedEmployeeService addCommissionedEmployee = new AddCommissionedEmployeeService(employeeId, "name", "address", 1000.00, 125.0);
         addCommissionedEmployee.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);//Friday
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         ValidatePaycheck(paydayTransaction, employeeId, date, 0);
@@ -476,14 +490,14 @@ public class TestAddSalariedEmployee {
     public void should_salaried_union_member_dues() {
         //give
         int employeeId = 1;
-        AddSalariedEmployee addSalariedEmployee = new AddSalariedEmployee(employeeId, "", "", 1000.00);
+        AddSalariedEmployeeService addSalariedEmployee = new AddSalariedEmployeeService(employeeId, "", "", 1000.00);
         addSalariedEmployee.execute();
         int memberId = 71;
-        ChangeMemberTransaction changeMemberTransaction = new ChangeMemberTransaction(employeeId, memberId, 29.0);
+        ChangeMemberIService changeMemberTransaction = new ChangeMemberIService(employeeId, memberId, 29.0);
         changeMemberTransaction.execute();
         LocalDate date = LocalDate.of(2017, 11, 30);
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);
@@ -501,18 +515,18 @@ public class TestAddSalariedEmployee {
     public void should_union_member_service_charge() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "", "", 25.00);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "", "", 25.00);
         addHourlyEmployee.execute();
         int memberId = 77;
-        ChangeMemberTransaction changeMemberTransaction = new ChangeMemberTransaction(employeeId, memberId, 9.43);
+        ChangeMemberIService changeMemberTransaction = new ChangeMemberIService(employeeId, memberId, 9.43);
         changeMemberTransaction.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);
-        ServiceChargeTransaction serviceChargeTransaction = new ServiceChargeTransaction(memberId, date, 19.26);
+        ServiceChargeIService serviceChargeTransaction = new ServiceChargeIService(memberId, date, 19.26);
         serviceChargeTransaction.execute();
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 8.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 8.0, employeeId);
         timeCardTransaction.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);
@@ -530,20 +544,20 @@ public class TestAddSalariedEmployee {
     public void should_union_member_service_charge_spanning() {
         //give
         int employeeId = 1;
-        AddHourlyEmployee addHourlyEmployee = new AddHourlyEmployee(employeeId, "", "", 25.00);
+        AddHourlyEmployeeService addHourlyEmployee = new AddHourlyEmployeeService(employeeId, "", "", 25.00);
         addHourlyEmployee.execute();
         int memberId = 77;
-        ChangeMemberTransaction changeMemberTransaction = new ChangeMemberTransaction(employeeId, memberId, 9.43);
+        ChangeMemberIService changeMemberTransaction = new ChangeMemberIService(employeeId, memberId, 9.43);
         changeMemberTransaction.execute();
         LocalDate date = LocalDate.of(2017, 12, 1);
-        ServiceChargeTransaction serviceChargeTransaction = new ServiceChargeTransaction(memberId, date, 19.26);
+        ServiceChargeIService serviceChargeTransaction = new ServiceChargeIService(memberId, date, 19.26);
         serviceChargeTransaction.execute();
-        ServiceChargeTransaction serviceChargeTransaction2 = new ServiceChargeTransaction(memberId, date.plusDays(20), 10);
+        ServiceChargeIService serviceChargeTransaction2 = new ServiceChargeIService(memberId, date.plusDays(20), 10);
         serviceChargeTransaction2.execute();
-        TimeCardTransaction timeCardTransaction = new TimeCardTransaction(date, 8.0, employeeId);
+        TimeCardIService timeCardTransaction = new TimeCardIService(date, 8.0, employeeId);
         timeCardTransaction.execute();
         //when
-        PaydayTransaction paydayTransaction = new PaydayTransaction(date);
+        PaydayIService paydayTransaction = new PaydayIService(date);
         paydayTransaction.execute();
         //then
         Paycheck paycheck = paydayTransaction.getPaycheck(employeeId);

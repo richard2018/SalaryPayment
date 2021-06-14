@@ -1,6 +1,6 @@
 package com.king.repository;
 
-import com.king.model.Employee;
+import com.king.model.employee.Employee;
 
 import java.util.ArrayList;
 import java.util.HashMap;

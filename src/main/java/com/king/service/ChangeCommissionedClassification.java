@@ -1,10 +1,11 @@
 package com.king.service;
 
-import com.king.model.BlweeklySchedule;
-import com.king.model.PaymentClassification;
-import com.king.model.PaymentSchedule;
+import com.king.model.schedule.BlweeklySchedule;
+import com.king.model.payclass.CommissionedClassification;
+import com.king.model.payclass.PaymentClassification;
+import com.king.model.schedule.PaymentSchedule;
 
-public class ChangeCommissionedClassification extends ChangeClassificationTransaction {
+public class ChangeCommissionedClassification extends ChangeClassificationIService {
     private double salary;
     private double commissionRate;
 
