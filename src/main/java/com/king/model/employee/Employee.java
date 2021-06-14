@@ -13,12 +13,15 @@ public class Employee {
     private int id;
     private String name;
     private String address;
+    private int type;
     private PaymentClassification paymentClassification;
     private PaymentSchedule paymentSchedule;
     private PaymentMethod paymentMethod;
 
     private Affiliation affiliation = new NoAffiliation();
 
+    public Employee() {
+    }
     public Employee(int id, String name, String address) {
         this.id = id;
         this.name = name;
@@ -89,5 +92,13 @@ public class Employee {
 
     public LocalDate getPayPeriodStartDate(LocalDate payDate) {
         return getPaymentSchedule().getPayPeriodStartDate(payDate);
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
